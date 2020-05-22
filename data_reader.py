@@ -4,11 +4,11 @@ import numpy as np
 
 
 def read_training():
-    return read_data('../data/train-images-idx3-ubyte.gz', '../data/train-labels-idx1-ubyte.gz')
+    return read_data('./data/train-images-idx3-ubyte.gz', './data/train-labels-idx1-ubyte.gz')
 
 
 def read_testing():
-    return read_data('../data/t10k-images-idx3-ubyte.gz', '../data/t10k-labels-idx1-ubyte.gz')
+    return read_data('./data/t10k-images-idx3-ubyte.gz', './data/t10k-labels-idx1-ubyte.gz')
 
 
 def read_data(img_dir, label_dir):
@@ -24,8 +24,11 @@ def read_data(img_dir, label_dir):
         struct.unpack('>4B', labels_file.read(4))
         num_images = struct.unpack('>I', labels_file.read(4))[0]
         labels = np.zeros((num_images, 10))
+        numerical_labels = []
         for i in range(num_images):
             label = np.zeros(10)
-            label[np.array(struct.unpack('>B', labels_file.read(1)))[0]] = 1
+            numerical_label = struct.unpack('>B', labels_file.read(1))
+            label[np.array(numerical_label)[0]] = 1
             labels[i, :] = label
-    return images, labels
+            numerical_labels.append(numerical_label)
+    return images, labels, numerical_labels
