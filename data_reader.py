@@ -5,14 +5,23 @@ import numpy as np
 MAX_BRIGHTNESS = 255
 
 def read_training():
+    """
+    Returns the training images and labels as 2D ndarrays.
+    """
     return read_data('./data/train-images-idx3-ubyte.gz', './data/train-labels-idx1-ubyte.gz')
 
 
 def read_testing():
+    """
+    Returns the testing images and labels as 2D ndarrays.
+    """
     return read_data('./data/t10k-images-idx3-ubyte.gz', './data/t10k-labels-idx1-ubyte.gz')
 
 
 def read_data(img_dir, label_dir):
+    """
+    Generic function for reading training and testing data, given an image directory and label directory.
+    """
     with gzip.open(img_dir) as image_file:
         struct.unpack('>4B', image_file.read(4))
         num_images = struct.unpack('>I', image_file.read(4))[0]

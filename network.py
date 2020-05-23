@@ -43,7 +43,10 @@ class Network:
             activations[i] = sigmoid(z)
         return activations, z_values
 
-    def backpropogate(self, data, label):
+    def backpropagate(self, data, label):
+        """
+        Runs backpropagation with the given data and label. Returns the weight gradient and bias gradient.
+        """
         activations, z_values = self.feedforward_transparent(data)
         errors = {self.L: (activations[self.L] - label) * sigmoid_derivative(z_values[self.L])}
         wg = {self.L: errors[self.L] @ activations[self.L - 1].T}
@@ -56,7 +59,8 @@ class Network:
 
     def epoch(self, data, labels, batch_size, eta):
         """
-        Trains the network for 1 epoch.
+        Trains the network for 1 epoch, given a dataset, corresponding labels, a desired batch size, and desired
+        step size eta.
         """
         start = 0
         while start < np.shape(data)[0]:
@@ -77,33 +81,16 @@ class Network:
             self.biases[layer] -= (eta / m) * bg[layer]
 
 
-def relu(x):
-    """
-    Only works on 1D ndarrays..
-    """
-    result = np.ndarray(len(x))
-    for i in range(len(x)):
-        if x[i] >= 0:
-            result[i] = x[i]
-        else:
-            result[i] = 0
-    return result
-
-
-def relu_derivative(x):
-    """
-    Only works on 1D ndarrays..
-    """
-    result = np.ndarray(len(x))
-    for i in range(len(x)):
-        if x[i] >= 0:
-            result[i] = 1.0
-        else:
-            result[i] = 0
-    return result
-
 def sigmoid(x):
+    """
+    Applies the sigmoid function element-wise to an ndarray, x.
+    """
     return 1.0 / (1.0 + np.exp(-x))
 
 def sigmoid_derivative(x):
+    """
+    Finds the element-wise sigmoid derivative for an ndarray, x.
+    :param x:
+    :return:
+    """
     return sigmoid(x) * (1.0 - sigmoid(x))
