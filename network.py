@@ -12,7 +12,7 @@ class Network:
         self.L = len(layers)
         for i in range(2, len(layers) + 1):
             self.weights[i] = np.random.randn(layers[i - 1], layers[i - 2])
-            self.biases[i] = np.random.randn(layers[i - 1])
+            self.biases[i] = np.random.randn(layers[i - 1], 1)
 
     def classify(self, data):
         """
@@ -32,7 +32,7 @@ class Network:
 
     def feedforward_transparent(self, data):
         """
-        Processes data represented as an n x 1 np array, where n is the size of the input alyer.
+        Processes data represented as an n x 1 np array, where n is the size of the input layer.
         Returns the activations and z values of the neurons in each layer.
         """
         activations = {1: data}
@@ -46,11 +46,11 @@ class Network:
     def backpropogate(self, data, label):
         activations, z_values = self.feedforward_transparent(data)
         errors = {self.L: (activations[self.L] - label) * sigmoid_derivative(z_values[self.L])}
-        wg = {self.L: errors[self.L].reshape(-1, 1) @ activations[self.L - 1].reshape(1, -1)}
+        wg = {self.L: errors[self.L] @ activations[self.L - 1].T}
         bg = {self.L: errors[self.L]}
-        for layer in range(self.L - 1, 1, -1): # L - 1 to 2
+        for layer in range(self.L - 1, 1, -1):
             errors[layer] = ((self.weights[layer + 1]).T @ errors[layer + 1]) * sigmoid_derivative(z_values[layer])
-            wg[layer] = errors[layer].reshape(-1, 1) @ activations[layer - 1].reshape(1, -1)
+            wg[layer] = errors[layer] @ activations[layer - 1].T
             bg[layer] = errors[layer]
         return wg, bg
 
@@ -64,7 +64,7 @@ class Network:
             wg = {j:np.zeros(np.shape(self.weights[j])) for j in range(2, self.L + 1)}
             bg = {j:np.zeros(np.shape(self.biases[j])) for j in range(2, self.L + 1)}
             for point in range(start, start + curr_size):
-                wg_addend, bg_addend = self.backpropogate(data[point, :], labels[point, :])
+                wg_addend, bg_addend = self.backpropogate(data[[point], :].T, labels[[point], :].T)
                 for layer in range(2, self.L + 1):
                     wg[layer] += wg_addend[layer]
                     bg[layer] += bg_addend[layer]
@@ -97,13 +97,13 @@ def relu_derivative(x):
     result = np.ndarray(len(x))
     for i in range(len(x)):
         if x[i] >= 0:
-            result[i] = 1
+            result[i] = 1.0
         else:
             result[i] = 0
     return result
 
 def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+    return 1.0 / (1.0 + np.exp(-x))
 
 def sigmoid_derivative(x):
-    return sigmoid(x) * (1 - sigmoid(x))
+    return sigmoid(x) * (1.0 - sigmoid(x))
